@@ -11,6 +11,7 @@
 [x] Step 7 Error Analysis
 [x] Step 8 README / Documentation 검수
 [x] Step 9 Final Reproducibility Check
+[x] Step 10 DAY1 모델 전략 보고서
 
 ## Step 1. Repository / Dataset 구조 파악
 
@@ -275,3 +276,167 @@
 ### Candidate Commit Message
 
 `fix: validate battery pipeline and align paper exclusions`
+
+## Step 10. DAY1 모델 전략 보고서
+
+상태: [x] 완료
+
+### 수행 내용
+
+- EDA에서 Feature Engineering과 후보 모델로 이어지는 9페이지 발표형 보고서를 구성했다.
+- 저장된 실제 EDA figure와 results 통계만 사용했다.
+- 편집 가능한 PPTX 원본과 최종 PDF를 생성했다.
+- PDF 전 페이지를 PNG로 렌더링해 한글 폰트, 그래프, 잘림, 겹침과 메시지 가독성을 확인했다.
+- 평가표 항목과 페이지 대응표를 작성했다.
+
+### 변경 파일
+
+- `reports/DS-MINI-Design-울산_1반-김낙근.pdf`
+- `reports/report_source/DS-MINI-Design-울산_1반-김낙근.pptx`
+- `reports/report_source/build_day1_report.mjs`
+- `reports/report_source/EVALUATION_MAPPING.md`
+- `README.md`
+- `.gitignore`
+- `DEVELOPMENT_STATUS.md`
+
+### 실행 및 테스트 결과
+
+- PPTX finalizer: package integrity PASS, layout finding 0, 9 slides
+- PDF: 9 pages, 16:9, 약 851KB
+- PDF page render: 9/9 성공
+- Visual validation: PASS
+- 첫 변환에서 한글 font 누락을 발견했고 Fontconfig에 system font 경로를 지정해 재생성 후 해결했다.
+
+### 주요 결과
+
+- 실제 수치: Batch median 842.0/468.5/964.5 cycles, Batch 2 short-life 76.5%
+- DeltaQ: Pearson -0.886, Spearman -0.880
+- C-rate: Pearson -0.577
+- DAY1 전략: ElasticNet을 주요 후보로 두고 Gradient Boosting과 비교한 뒤 DAY2 Validation에서 최종 선택
+
+### 인터페이스 영향
+
+없음
+
+### 팀 작업 영향
+
+- PPTX 원본에서 이름, 반, 문구를 직접 편집할 수 있다.
+- 재생성 시 `AppleGothic`과 system font를 LibreOffice Fontconfig에 제공해야 한다.
+
+### 미해결 이슈
+
+- 파일명은 요구사항 예시와 사용자 경로를 근거로 `울산_1반-김낙근`을 사용했다. 실제 반 또는 팀원 구성이 다르면 파일명과 표지를 변경해야 한다.
+
+### Git 상태
+
+- Branch: `main`
+- 보고서 관련 파일은 아직 commit/push하지 않음
+
+### Candidate Commit Message
+
+`📝[DOCS] DAY1 ESS 배터리 모델 전략 보고서 추가`
+
+## Step 11. DAY1 전체 보고서 재디자인
+
+상태: [x] 완료
+
+### 수행 내용
+
+- 기존 9페이지 흐름과 분석 수치를 유지하면서 흰색 기반 데이터 분석 보고서로 정보구조를 전면 재구성했다.
+- EDA 5개 페이지에 `Analysis Question → Graph/Evidence → Key Finding → ESS Implication → Modeling Decision` 흐름을 적용했다.
+- Feature Engineering을 `EDA Observation → Interpretation → Engineered Feature` 표로 재구성했다.
+- Modeling Strategy에 전통 ML 우선 논리와 Batch 1/2/3의 역할을 분리해 Test Batch가 모델 선택에 사용되지 않음을 명시했다.
+- Conclusion을 Early Prediction, Trend over Absolute Value, Operating Condition Matters, Generalization is Critical의 네 가지 ESS 시사점으로 재구성했다.
+
+### 변경 파일
+
+- `reports/DS-MINI-Design-울산_1반-김낙근.pdf`
+- `reports/report_source/DS-MINI-Design-울산_1반-김낙근.pptx`
+- `reports/report_source/build_day1_report_redesign.mjs`
+- `reports/report_source/EVALUATION_MAPPING.md`
+- `README.md`
+- `.gitignore`
+- `DEVELOPMENT_STATUS.md`
+
+### 실행 및 테스트 결과
+
+- PPTX finalizer: package integrity PASS, layout finding 0, 9 slides
+- PDF: 9 pages, 약 920KB
+- PDF page render: 9/9 성공
+- 전 페이지 contact sheet와 핵심 Page 2, 6, 8, 9 원본 크기 시각 검수 PASS
+- PDF 텍스트 추출로 기존 핵심 수치와 최종 모델링 전략 문구 보존 확인
+
+### 주요 결과
+
+- 기존 수치와 분석 결과를 변경하지 않았다.
+- 그래프보다 Key Finding, ESS Implication, Modeling Decision이 먼저 읽히도록 페이지 위계를 통일했다.
+- 기존 matplotlib figure는 보고서 내에서 충분한 크기로 확대하고, 축·범례가 PDF에서 식별 가능한지 렌더링 결과로 확인했다.
+
+### 미해결 이슈
+
+- 없음
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📝[DOCS] ESS 배터리 분석 보고서 화이트 리디자인`
+
+## Step 12. Pretendard 및 한글 중심 문구 적용
+
+상태: [x] 완료
+
+### 수행 내용
+
+- 보고서 전체 글꼴을 AppleGothic에서 Pretendard로 변경했다.
+- 공식 Pretendard v1.3.9 글꼴을 작업용 폰트 경로에서만 사용해 PPTX와 PDF를 재생성했다.
+- 분석 질문, 핵심 발견, ESS 시사점, 모델링 결정, 검증 구조와 결론의 영문 표기를 한글 중심으로 수정했다.
+- ESS, Batch, Cell, Cycle, Feature, 모델명과 변수명처럼 의미 보존이 필요한 용어만 영문으로 유지했다.
+
+### 실행 및 테스트 결과
+
+- PPTX font policy: Pretendard 217개 텍스트 요소 확인
+- PPTX package integrity PASS, layout finding 0, 9 slides
+- PDF 9페이지 렌더링 및 핵심 Page 2, 8, 9 원본 크기 시각 검수 PASS
+- PDF 텍스트 추출로 한글 구조 문구와 최종 모델링 전략 보존 확인
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`🎨[REF] ESS 보고서 Pretendard 및 한글 문구 적용`
+
+## Step 13. README 제출 형식 재구성
+
+상태: [x] 완료
+
+### 수행 내용
+
+- 사용자 제공 목차에 맞춰 README 전체 구조를 재작성했다.
+- 프로젝트 목적, 데이터 구성, EDA 핵심 발견, Feature Engineering, 모델 선택 근거, 성능, 오류 분석과 ESS 도메인 해석을 실제 실행 결과로 채웠다.
+- 태스크는 실제 구현에 맞춰 Regression으로 명시했다.
+- 팀 구성은 김낙근 1인으로 반영했다.
+
+### 실행 및 테스트 결과
+
+- 저장된 결과 CSV와 README 핵심 수치 대조 완료
+- Markdown 코드 블록과 표 구조 확인
+- `git diff --check`: PASS
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📝[DOCS] ESS 배터리 프로젝트 README 재구성`
