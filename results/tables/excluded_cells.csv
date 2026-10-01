@@ -1,0 +1,25 @@
+cell_id,batch,exclusion_reason
+Batch1_cell_008,Batch1,paper exclusion: did not reach 80% capacity
+Batch1_cell_010,Batch1,paper exclusion: did not reach 80% capacity
+Batch1_cell_012,Batch1,paper exclusion: did not reach 80% capacity
+Batch1_cell_013,Batch1,paper exclusion: did not reach 80% capacity
+Batch1_cell_022,Batch1,paper exclusion: did not reach 80% capacity
+Batch2_cell_007,Batch2,paper exclusion: continuation of Batch1 cell
+Batch2_cell_008,Batch2,paper exclusion: continuation of Batch1 cell
+Batch2_cell_009,Batch2,paper exclusion: continuation of Batch1 cell
+Batch2_cell_015,Batch2,paper exclusion: continuation of Batch1 cell
+Batch2_cell_016,Batch2,paper exclusion: continuation of Batch1 cell
+Batch2_cell_022,Batch2,missing cycle_life target
+Batch2_cell_023,Batch2,missing cycle_life target
+Batch2_cell_035,Batch2,missing cycle_life target
+Batch2_cell_036,Batch2,missing cycle_life target
+Batch2_cell_037,Batch2,missing cycle_life target
+Batch2_cell_038,Batch2,missing cycle_life target
+Batch2_cell_039,Batch2,missing cycle_life target
+Batch2_cell_040,Batch2,missing cycle_life target
+Batch3_cell_002,Batch3,paper exclusion: noisy channel
+Batch3_cell_023,Batch3,paper exclusion: noisy channel
+Batch3_cell_032,Batch3,paper exclusion: noisy channel
+Batch3_cell_037,Batch3,paper exclusion: noisy channel
+Batch3_cell_042,Batch3,paper exclusion: noisy channel
+Batch3_cell_043,Batch3,paper exclusion: noisy channel

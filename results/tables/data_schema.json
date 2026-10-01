@@ -1,0 +1,44 @@
+{
+  "Batch1": {
+    "path": "/Users/nak/Downloads/archive/2017-05-12_batchdata_updated_struct_errorcorrect.mat",
+    "cell_count": 46,
+    "batch_fields": [
+      "Vdlin",
+      "barcode",
+      "channel_id",
+      "cycle_life",
+      "cycles",
+      "policy",
+      "policy_readable",
+      "summary"
+    ]
+  },
+  "Batch2": {
+    "path": "/Users/nak/Downloads/archive/2018-02-20_batchdata_updated_struct_errorcorrect.mat",
+    "cell_count": 47,
+    "batch_fields": [
+      "Vdlin",
+      "barcode",
+      "channel_id",
+      "cycle_life",
+      "cycles",
+      "policy",
+      "policy_readable",
+      "summary"
+    ]
+  },
+  "Batch3": {
+    "path": "/Users/nak/Downloads/archive/2018-04-12_batchdata_updated_struct_errorcorrect.mat",
+    "cell_count": 46,
+    "batch_fields": [
+      "Vdlin",
+      "barcode",
+      "channel_id",
+      "cycle_life",
+      "cycles",
+      "policy",
+      "policy_readable",
+      "summary"
+    ]
+  }
+}

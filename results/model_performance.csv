@@ -1,0 +1,9 @@
+set,mape_percent,note
+Train (Batch 1 CV),10.454488079062692,GradientBoosting
+Valid (Batch 1 Hold-out),8.4761812180986,GroupShuffleSplit by charging_policy
+Test (Batch2),37.00555585267312,external batch; no tuning
+Test (Batch3),16.93117646113116,external batch; no tuning
+Gap Train-Valid,-1.9783068609640928,%p
+Gap Valid-Test,28.52937463457452,%p
+Gap Target-Test,27.905555852673118,%p vs paper target
+Gap Batch2-Batch3,-20.07437939154196,%p

@@ -1,0 +1,44 @@
+{
+  "selected_model": "GradientBoosting",
+  "features": [
+    "log_dq_var",
+    "dq_mean",
+    "dq_min",
+    "dq_range",
+    "qd_10",
+    "qd_100",
+    "qd_slope_10_100",
+    "ir_10",
+    "ir_change_10_100",
+    "tavg_mean_10_100",
+    "tmax_max_10_100",
+    "charge_time_mean_10_100",
+    "first_c_rate",
+    "switch_soc",
+    "second_c_rate"
+  ],
+  "split_method": "GroupShuffleSplit by charging_policy",
+  "model_comparison": [
+    {
+      "model": "LinearRegression",
+      "cv_mape": 16.954564736602823,
+      "cv_std": 2.9450486306342865,
+      "valid_mape": 68.35580789492107,
+      "best_params": "{}"
+    },
+    {
+      "model": "ElasticNet",
+      "cv_mape": 8.096499226883676,
+      "cv_std": 2.2083346334954554,
+      "valid_mape": 20.57742558651807,
+      "best_params": "{\"model__alpha\": 0.01, \"model__l1_ratio\": 0.1}"
+    },
+    {
+      "model": "GradientBoosting",
+      "cv_mape": 10.454488079062692,
+      "cv_std": 2.572061709197066,
+      "valid_mape": 8.4761812180986,
+      "best_params": "{\"model__learning_rate\": 0.1, \"model__max_depth\": 1, \"model__n_estimators\": 100}"
+    }
+  ]
+}

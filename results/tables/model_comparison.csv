@@ -1,0 +1,4 @@
+model,cv_mape,cv_std,valid_mape,best_params
+GradientBoosting,10.454488079062692,2.572061709197066,8.4761812180986,"{""model__learning_rate"": 0.1, ""model__max_depth"": 1, ""model__n_estimators"": 100}"
+ElasticNet,8.096499226883676,2.2083346334954554,20.57742558651807,"{""model__alpha"": 0.01, ""model__l1_ratio"": 0.1}"
+LinearRegression,16.954564736602823,2.9450486306342865,68.35580789492107,{}
