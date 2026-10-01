@@ -223,14 +223,6 @@ Test 결과를 확인한 뒤 현재 Feature나 하이퍼파라미터를 다시 �
 
 특히 Batch 2처럼 학습 분포와 다른 환경에서는 단일 예측값만으로 정비를 자동화하면 안 된다.
 
-## 보고서
-
-- 최종 PDF: `reports/DS-MINI-Design-울산_1반-김낙근.pdf`
-- 편집 원본: `reports/report_source/DS-MINI-Design-울산_1반-김낙근.pptx`
-- 재생성 코드: `reports/report_source/build_day1_report_redesign.mjs`
-- 평가표 대응: `reports/report_source/EVALUATION_MAPPING.md`
-- 본문 글꼴: Pretendard
-
 ## 참고문헌
 
 - Severson, K. A. et al. (2019). Data-driven prediction of battery cycle life before capacity degradation. *Nature Energy*, 4, 383–391.
