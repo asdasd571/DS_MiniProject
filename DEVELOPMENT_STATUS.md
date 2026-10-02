@@ -440,3 +440,146 @@
 ### Candidate Commit Message
 
 `📝[DOCS] ESS 배터리 프로젝트 README 재구성`
+
+## Step 14. EDA 그래프와 ESS 시사점 연결 강화
+
+상태: [x] 완료
+
+### 수행 내용
+
+- EDA 5개 페이지의 ESS 시사점 박스를 진한 Navy 배경으로 확대·강조했다.
+- 각 그래프에 `그래프 관계`와 `ESS 의미`를 분리해 배터리 수명 예측과의 연결을 직접 설명했다.
+- Batch 분포, 용량 열화, ΔQ(V), 충전 정책, Feature 상관관계가 모델링 결정으로 이어지는 논리를 보강했다.
+- 기존 분석 수치와 모델 결과는 변경하지 않았다.
+
+### 실행 및 테스트 결과
+
+- PPTX package integrity PASS, layout finding 0, 9 slides
+- PDF 9페이지 생성 및 렌더링 성공
+- EDA Page 2~6 원본 크기 시각 검수 PASS
+- 시사점 박스의 글자 잘림, 그래프 가림 및 요소 겹침 없음
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`🎨[REF] EDA 그래프와 ESS 시사점 연결 강화`
+
+## Step 15. EDA 핵심 결론 중심 문구 정리
+
+상태: [x] 완료
+
+### 수행 내용
+
+- `그래프 해석`, `그래프 관계`, `ESS 의미`, `시사점` 같은 설명용 표기를 보고서에서 제거했다.
+- 진한 강조 박스의 첫 문장을 평가자가 바로 확인해야 할 핵심 결론으로 변경했다.
+- 그래프를 읽는 방법보다 분석을 통해 새롭게 알 수 있는 내용과 의사결정 의미가 먼저 보이도록 문장 위계를 조정했다.
+- 결론 페이지 제목도 `네 가지 핵심 결론`으로 변경했다.
+
+### 실행 및 테스트 결과
+
+- PPTX package integrity PASS, layout finding 0, 9 slides
+- PDF 텍스트에서 제거 대상 표현이 남아 있지 않음을 확인
+- 핵심 결론 문구 및 9페이지 출력 확인
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`🎨[REF] EDA 핵심 결론 중심으로 보고서 문구 개선`
+
+## Step 16. DAY1 Batch 비교 연결 페이지 추가
+
+상태: [x] 완료
+
+### 수행 내용
+
+- 사용자가 제공한 8페이지 DAY1 PDF를 기준으로 기존 페이지를 유지했다.
+- Feature Engineering 앞에 `5개 EDA 질문 → Feature 설계 → 모델 전략` 연결 페이지를 삽입했다.
+- Batch 1·2·3의 실제 유효 Cell 데이터로 `qd_slope`, `log_dq_var`, `first_c_rate`의 수명 상관관계를 다시 계산해 반영했다.
+- 세 Batch에서 공통으로 유지되는 ΔQ 신호와 Batch마다 달라지는 QD slope·C-rate 관계를 구분했다.
+- 원본 Keynote PDF의 한글 폰트가 손상되지 않도록 macOS PDFKit으로 병합했다.
+
+### 실행 및 테스트 결과
+
+- 원본 8페이지 + 연결 페이지 1페이지 = 최종 9페이지
+- 연결 페이지 PPTX package integrity PASS, layout finding 0
+- macOS PDFKit 렌더링으로 기존 페이지와 신규 Page 7의 한글 출력 확인
+- Page 7~9 원본 크기 시각 검수 PASS
+
+### 생성 파일
+
+- `reports/DS-MINI-Design-울산_1반-김낙근_day1_수정.pdf`
+- `reports/report_source/day1-eda-to-strategy.pptx`
+- `reports/report_source/build_day1_bridge.mjs`
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📊[DOCS] DAY1 Batch 비교와 모델 전략 연결 페이지 추가`
+
+## Step 17. DAY1 v5 Batch 비교형 EDA 전면 개편
+
+상태: [x] 완료
+
+### 수행 내용
+
+- v5의 8페이지 흐름과 흰색·Navy·Teal·Orange 디자인을 유지하면서 EDA 01~05를 Batch 1·2·3 비교 구조로 다시 구성했다.
+- Repository의 기존 전처리·Feature 정의를 그대로 재사용해 분포, QD 열화, ΔQ(V), 충전조건, Feature 상관 수치를 다시 계산했다.
+- 모든 EDA 페이지를 `질문 → Batch 비교 근거 → 핵심 수치 → Modeling Decision` 순서로 통일했다.
+- Cycle Life 구간표, 전체/초기 QD 곡선, ΔQ 곡선과 수명 산점도, Protocol 평균 및 C-rate 산점도, Batch별 Target 상관과 Batch 1 Feature 상관행렬을 반영했다.
+- Knee는 전체 수명 정보를 사용하는 사후 설명 지표로 명시하고 모델 입력에서 제외했다.
+- Feature Engineering에서 `cycle_life`를 Y, `log(cycle_life)`를 모델 Target으로 분리하고 X에 포함되지 않음을 명시했다.
+- 모델 선택과 튜닝은 Batch 1에서만 수행하며 Batch 2·3의 EDA는 설명용, 평가는 고정 모델의 외부 일반화 확인용으로 정리했다.
+
+### 실제 Batch 수치
+
+- Batch 1: n=41, 평균 838.6, 중앙값 842.0, 단수명 0.0%, 장수명 24.4%
+- Batch 2: n=34, 평균 550.7, 중앙값 468.5, 단수명 76.5%, 장수명 8.8%
+- Batch 3: n=40, 평균 1,032.0, 중앙값 964.5, 단수명 0.0%, 장수명 47.5%
+- `log_dq_var`와 Cycle Life Pearson r: Batch 1 -0.89, Batch 2 -0.91, Batch 3 -0.74
+- `first_c_rate`와 Cycle Life Pearson r: Batch 1 -0.58, Batch 2 +0.14, Batch 3 -0.04
+
+### 실행 및 테스트 결과
+
+- 8페이지 PPTX package integrity PASS
+- EDA 01~04의 21개 Native Chart와 Embedded Workbook 검증 PASS
+- Native Table 필수 페이지 2, 6, 7, 8 검증 PASS
+- Pretendard font policy 확인, layout finding 0
+- PPTX 전체 8페이지 렌더링 및 원본 크기 시각 검수 PASS
+- Keynote/PDF 8페이지 출력 후 Poppler 재렌더링 검수 PASS
+- Keynote의 실행 중 Font Cache 문제를 피하기 위해 `.key`는 고해상도 슬라이드 이미지 기반으로 생성했으며, 편집 가능한 Chart/Table 원본은 PPTX에 유지했다.
+
+### 생성 파일
+
+- `reports/DS-MINI-Design-울산_1반-김낙근_day1_v6.pptx`
+- `reports/DS-MINI-Design-울산_1반-김낙근_day1_v6.key`
+- `reports/DS-MINI-Design-울산_1반-김낙근_day1_v6.pdf`
+- `results/tables/day1_batch_comparison.json`
+- `results/tables/day1_batch_summary.csv`
+- `results/tables/day1_relationships.csv`
+- `results/tables/day1_shortest_cells.csv`
+- `scripts/build_day1_batch_evidence.py`
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📊[REF] DAY1 Batch 비교형 EDA와 모델 전략 개편`

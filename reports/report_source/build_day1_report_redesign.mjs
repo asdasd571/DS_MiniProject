@@ -51,6 +51,12 @@ function info(slide, label, body, x, y, w, h, tone = "teal") {
   txt(slide, label, x + 18, y + 12, w - 36, 24, 14, color, true);
   txt(slide, body, x + 18, y + 38, w - 36, h - 48, 17, C.ink, false);
 }
+function essInsight(slide, headline, body, x, y, w, h) {
+  shape(slide, x, y, w, h, C.navy, "roundRect", "none");
+  shape(slide, x, y, 8, h, C.teal, "roundRect", "none");
+  txt(slide, headline, x + 24, y + 12, w - 48, 36, 21, "#58D1C8", true);
+  txt(slide, body, x + 24, y + 50, w - 48, h - 62, 16, C.white, false);
+}
 function note(slide, value) { slide.speakerNotes.textFrame.setText(value); }
 
 // 1. Executive setup
@@ -76,8 +82,8 @@ function note(slide, value) { slide.speakerNotes.textFrame.setText(value); }
   await img(s, "eda_cycle_life_hist.png", 64, 182, 500, 230, "Cycle life histogram by batch");
   await img(s, "eda_cycle_life_boxplot.png", 64, 440, 500, 184, "Cycle life boxplot by batch");
   info(s, "핵심 발견", "중앙값은 Batch 1 842.0, Batch 2 468.5, Batch 3 964.5 cycles다. Batch 2의 76.5%가 500 cycle 미만이다.", 600, 176, 580, 130, "warn");
-  info(s, "ESS 시사점", "실제 ESS에서도 운전환경이나 사용조건이 달라지면 학습 데이터와 현장 데이터 사이에 분포 이동이 발생할 수 있다.", 600, 326, 580, 130, "navy");
-  info(s, "모델링 결정", "Batch 1에서만 모델을 선택하고 튜닝한다. Batch 2는 단수명 영역 외부 테스트, Batch 3는 장수명 영역 추가 외부 테스트로 사용한다.", 600, 476, 580, 148, "teal");
+  essInsight(s, "한 Batch의 높은 정확도만으로 현장 적용성을 판단할 수 없다", "운전환경에 따라 수명 분포가 크게 달라진다. Batch 2·3에서 외부 일반화 성능을 확인해야 한다.", 600, 326, 580, 146);
+  info(s, "모델링 결정", "Batch 1에서만 모델을 선택하고 튜닝한다. Batch 2는 단수명 영역 외부 테스트, Batch 3는 장수명 영역 추가 외부 테스트로 사용한다.", 600, 492, 580, 132, "teal");
   note(s, "Source: results/tables/cycle_life_summary.csv and cycle-life figures.");
 }
 
@@ -89,8 +95,8 @@ function note(slide, value) { slide.speakerNotes.textFrame.setText(value); }
   txt(s, "분석 근거", 64, 594, 90, 24, 14, C.gray, true);
   txt(s, "qd_10 vs cycle_life  ·  Pearson r = 0.101", 150, 588, 500, 34, 19, C.navy, true);
   info(s, "핵심 발견", "초기 QD 곡선은 상당 부분 겹치며 특정 Cycle의 용량 절대값과 수명의 관계가 약하다.", 750, 184, 430, 116, "warn");
-  info(s, "ESS 시사점", "한 시점의 용량만으로 장기 수명을 판단하기보다 초기 운전 구간의 열화 변화 추세를 추적해야 한다.", 750, 320, 430, 128, "navy");
-  info(s, "모델링 결정", "qd_change, qd_slope와 전압별 곡선 변화인 ΔQ(V)를 생성한다.", 750, 468, 430, 106, "teal");
+  essInsight(s, "현재 용량이 비슷해도 남은 수명은 다를 수 있다", "조기 위험 Cell을 구분하려면 단일 용량값보다 초기 열화 변화 속도와 곡선 변화를 추적해야 한다.", 750, 320, 430, 154);
+  info(s, "모델링 결정", "qd_change, qd_slope와 전압별 곡선 변화인 ΔQ(V)를 생성한다.", 750, 494, 430, 80, "teal");
   txt(s, "다음 분석", 750, 596, 90, 22, 14, C.gray, true);
   txt(s, "초기 10-100 Cycle의 미세한 Curve 변화는 수명을 설명하는가?", 840, 588, 340, 38, 17, C.teal, true);
   note(s, "Source: results/figures/eda_degradation_curve.png and feature_target_correlations.csv.");
@@ -110,8 +116,8 @@ function note(slide, value) { slide.speakerNotes.textFrame.setText(value); }
   txt(s, "-0.886", 1010, 326, 160, 54, 38, C.red, true, "center");
   txt(s, "Spearman", 1020, 404, 140, 24, 14, C.gray, true, "center");
   txt(s, "-0.880", 1010, 430, 160, 54, 38, C.orange, true, "center");
-  info(s, "ESS 시사점", "배터리 수명 종료까지 기다리지 않고 초기 수명 데이터만으로 장기 열화 위험 Cell을 조기에 선별할 가능성을 보여준다.", 64, 548, 720, 88, "navy");
-  info(s, "모델링 결정", "log_dq_var를 핵심 Feature 후보로 선정한다.", 806, 548, 374, 88, "teal");
+  essInsight(s, "초기 100 Cycle만으로 장기 열화 위험을 선별할 가능성이 있다", "ΔQ(V) 변화가 큰 Cell일수록 수명이 짧아지는 경향이 강하다.", 64, 542, 792, 98);
+  info(s, "모델링 결정", "log_dq_var를 핵심 Feature 후보로 선정한다.", 878, 542, 302, 98, "teal");
   note(s, "Source: results/figures/eda_delta_q_curve.png, eda_delta_q_vs_cycle_life.png, and actual Batch 1 correlations.");
 }
 
@@ -123,8 +129,8 @@ function note(slide, value) { slide.speakerNotes.textFrame.setText(value); }
   txt(s, "충전 정책 분해", 64, 586, 120, 24, 14, C.gray, true);
   txt(s, "4.8C(80%)-3.6C  →  first_c_rate 4.8  /  switch_soc 0.8  /  second_c_rate 3.6", 184, 578, 690, 38, 18, C.navy, true);
   info(s, "핵심 발견", "first_c_rate와 Cycle Life 사이에 Pearson r = -0.577의 연관이 관찰됐다.", 770, 186, 410, 104, "warn");
-  info(s, "ESS 시사점", "실제 ESS 수명 예측은 열화 상태뿐 아니라 충전 운전조건도 함께 고려해야 한다. 상관관계를 인과관계로 확대 해석하지 않는다.", 770, 310, 410, 144, "navy");
-  info(s, "모델링 결정", "C-rate Feature를 포함하고 charging_policy를 고려한 그룹 분할을 적용한다.", 770, 474, 410, 112, "teal");
+  essInsight(s, "Cell 상태가 같아도 운전조건이 다르면 기대수명은 달라질 수 있다", "C-rate를 예측 변수와 검증 그룹에 포함하되, 관찰된 연관성을 인과관계로 단정하지 않는다.", 770, 310, 410, 166);
+  info(s, "모델링 결정", "C-rate Feature를 포함하고 charging_policy를 고려한 그룹 분할을 적용한다.", 770, 496, 410, 90, "teal");
   note(s, "Source: results/figures/eda_charging_policy.png and feature_target_correlations.csv.");
 }
 
@@ -137,8 +143,8 @@ function note(slide, value) { slide.speakerNotes.textFrame.setText(value); }
   shape(s, 64, 560, 838, 68, C.paleNavy, "roundRect", "none");
   txt(s, "dq_std -0.896   ·   log_dq_var -0.886   ·   dq_range -0.884   ·   dq_min +0.883", 82, 574, 802, 40, 19, C.navy, true, "center");
   info(s, "핵심 발견", "ΔQ Feature들은 Cycle Life와 높은 상관을 보이지만 서로도 강하게 연관된다.", 930, 186, 250, 112, "warn");
-  info(s, "ESS 시사점", "유사한 열화 신호를 무작정 늘리기보다 대표 지표를 선택해 안정적인 예측 모델을 구성해야 한다.", 930, 318, 250, 144, "navy");
-  info(s, "모델링 결정", "Feature Selection 또는 Regularization을 적용한다.", 930, 482, 250, 104, "teal");
+  essInsight(s, "강한 열화 신호를 많이 넣는 것보다 대표 지표를 잘 고르는 것이 중요하다", "서로 비슷한 ΔQ Feature를 줄이고 정규화해 새로운 운전환경에서도 안정적인 모델을 구성한다.", 920, 308, 270, 184);
+  info(s, "모델링 결정", "Feature Selection 또는 Regularization을 적용한다.", 920, 512, 270, 86, "teal");
   note(s, "Source: results/figures/eda_feature_target_corr.png and eda_feature_corr_heatmap.png.");
 }
 
@@ -213,7 +219,7 @@ function note(slide, value) { slide.speakerNotes.textFrame.setText(value); }
 // 9. Conclusion
 {
   const s = deck.slides.add(); s.background.fill = C.white;
-  heading(s, "ESS 수명 예측을 위한 네 가지 핵심 시사점", "EDA 결과를 현장 적용 관점과 모델 검증 전략으로 연결", 9, "결론");
+  heading(s, "ESS 수명 예측에서 확인한 네 가지 핵심 결론", "EDA 결과를 현장 적용 관점과 모델 검증 전략으로 연결", 9, "결론");
   const items = [
     ["01", "조기 예측", "초기 Cycle 데이터로 장기 배터리 수명 위험을 조기에 구분할 가능성", C.paleTeal, C.teal],
     ["02", "절대값보다 추세", "단일 용량값보다 초기 열화 변화 패턴을 추적하는 것이 중요", C.paleNavy, C.navy],

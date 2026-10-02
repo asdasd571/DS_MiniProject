@@ -1,0 +1,10 @@
+batch,cell_id,cycle_life,status
+Batch1,Batch1_cell_020,534.0,분석 포함
+Batch1,Batch1_cell_021,559.0,분석 포함
+Batch1,Batch1_cell_045,599.0,분석 포함
+Batch2,Batch2_cell_019,392.0,분석 포함
+Batch2,Batch2_cell_006,393.0,분석 포함
+Batch2,Batch2_cell_015,396.0,제외: paper exclusion: continuation of Batch1 cell
+Batch3,Batch3_cell_028,541.0,분석 포함
+Batch3,Batch3_cell_006,667.0,분석 포함
+Batch3,Batch3_cell_031,731.0,분석 포함
