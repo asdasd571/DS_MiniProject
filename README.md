@@ -90,7 +90,7 @@ python scripts/validate_results.py
 - Batch 3는 1,000 Cycle 초과 Cell이 47.5%다.
 - **핵심 발견:** Batch 2는 단수명 방향, Batch 3는 장수명 방향의 분포 이동이 존재하므로 두 Batch를 외부 일반화 평가에 사용해야 한다.
 
-![Batch별 Cycle Life 분포](results/figures/eda_cycle_life_hist.png)
+![Batch별 Cycle Life 구간 비교](results/figures/day1_eda01_cycle_life_by_batch.png)
 
 ### 열화 곡선 분석
 
@@ -100,7 +100,7 @@ python scripts/validate_results.py
 - Cycle 100 이후의 값은 미래 정보 누수를 막기 위해 Feature에 사용하지 않았다.
 - **핵심 발견:** 특정 시점의 용량 절대값보다 초기 구간의 용량 변화량과 열화 추세가 수명 예측에 더 적합하다.
 
-![대표 Cell의 용량 열화 곡선](results/figures/eda_degradation_curve.png)
+![Batch별 전체 수명과 초기 100 Cycle QD 열화 비교](results/figures/day1_eda02_qd_degradation_by_batch.png)
 
 ### ΔQ(V) 곡선 분석
 
@@ -110,7 +110,7 @@ python scripts/validate_results.py
 - ΔQ 파생 Feature인 `dq_std`, `log_dq_var`, `dq_range`, `dq_min`은 Cycle Life와 강한 관계를 보였다.
 - **핵심 발견:** 초기 10~100 Cycle 사이의 방전곡선 변화는 장기 Cycle Life를 설명하는 핵심 조기 열화 신호다.
 
-![ΔQ 분산과 Cycle Life의 관계](results/figures/eda_delta_q_vs_cycle_life.png)
+![Batch별 ΔQ 곡선과 ΔQ 분산의 Cycle Life 관계](results/figures/day1_eda03_delta_q_by_batch.png)
 
 ### 충전 속도(C-rate)와 수명의 관계
 
@@ -119,7 +119,7 @@ python scripts/validate_results.py
 - 정책별 표본 수가 작고 온도, 충전시간 및 다른 운전조건이 함께 작용하므로 상관관계를 인과관계로 해석하지 않았다.
 - **핵심 발견:** Cell의 열화 상태뿐 아니라 충전 운전조건도 수명 예측 Feature와 검증 구조에 포함해야 한다.
 
-![충전 정책별 Cycle Life](results/figures/eda_charging_policy.png)
+![Batch별 충전 Protocol과 C-rate의 Cycle Life 관계](results/figures/day1_eda04_charging_by_batch.png)
 
 ### Feature 상관관계
 
@@ -128,7 +128,7 @@ python scripts/validate_results.py
 - 결측값 보완, Scaling 및 정규화는 Pipeline 내부에서 각 학습 Fold에 대해서만 수행하여 데이터 누수를 방지했다.
 - **핵심 발견:** 유사한 열화 Feature를 무작정 늘리기보다 정규화 또는 제한된 모델 복잡도를 사용해야 한다.
 
-![Batch 1 Feature 상관관계](results/figures/eda_feature_corr_heatmap.png)
+![Batch별 Feature와 Cycle Life 관계 및 Batch 1 다중공선성](results/figures/day1_eda05_correlation_strategy.png)
 
 ## Modeling
 

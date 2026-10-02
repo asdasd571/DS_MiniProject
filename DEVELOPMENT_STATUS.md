@@ -659,3 +659,30 @@
 ### Candidate Commit Message
 
 `📝[DOCS] ESS 배터리 수명 예측 README 정리`
+
+## Step 20. README EDA 이미지 보고서 버전 동기화
+
+상태: [x] 완료
+
+### 수행 내용
+
+- DAY1 v6 PDF의 EDA 01~05 페이지를 시각적으로 확인했다.
+- README의 기존 단일 EDA 그래프 5개를 보고서와 동일한 Batch 1·2·3 비교형 그래프로 교체했다.
+- Cycle Life, QD 열화, ΔQ(V), 충전조건, Feature 상관관계 순서를 보고서와 동일하게 유지했다.
+- PDF 및 기존 이미지 파일은 수정하지 않고 README의 이미지 참조와 대체 설명만 갱신했다.
+
+### 테스트 결과
+
+- README가 참조하는 이미지 5개 존재 확인 완료
+- 결과 검증 스크립트 통과
+- `git diff --check` 통과
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📝[DOCS] README EDA 이미지를 보고서 그래프로 교체`
