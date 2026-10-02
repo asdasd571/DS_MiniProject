@@ -686,3 +686,45 @@
 ### Candidate Commit Message
 
 `📝[DOCS] README EDA 이미지를 보고서 그래프로 교체`
+
+## Step 21. README 기반 최종 프로젝트 보고서 확장
+
+상태: [x] 완료
+
+### 수행 내용
+
+- DAY1 v6의 기존 8페이지와 흰색·Navy·Teal·Orange 디자인을 유지했다.
+- README의 모델 개발, 성능 평가, 오류 분석, ESS 적용 내용을 4페이지로 추가했다.
+- 후보 모델 비교와 Batch 1 Hold-out 기준의 Gradient Boosting 선택 근거를 정리했다.
+- Batch 1 CV, Hold-out, Batch 2·3 Test MAPE와 원논문 Target 대비 차이를 시각화했다.
+- Batch 2 단수명 Cell 과대예측과 학습 분포 외삽 문제를 오류 분석 페이지에 반영했다.
+- 결론을 초기 예측, 변화 추세, 운전조건, 일반화 검증의 네 가지 ESS 관점으로 정리했다.
+
+### 실행 및 테스트 결과
+
+- 총 12페이지 PPTX 및 PDF 생성
+- PPTX package integrity PASS
+- Pretendard font policy PASS
+- Native Table 2개, Native Chart 1개 구조 검증 PASS
+- 전체 12페이지 PDF 출력 확인
+- 추가 페이지 9~12 한글, 표, 수치, 여백 시각 검수 PASS
+
+### 생성 파일
+
+- `reports/DS-MINI-Design-울산_1반-김낙근_final_v2.pptx`
+- `reports/DS-MINI-Design-울산_1반-김낙근_final_v2.pdf`
+
+### 참고 사항
+
+- 기존 DAY1 8페이지는 원본 디자인을 그대로 보존한 고해상도 페이지다.
+- 추가 페이지는 한글 렌더링 안정성을 위해 Pretendard 고해상도 표시 레이어를 사용했으며, 검증용 Native Table과 Chart 데이터를 함께 포함했다.
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📊[DOCS] README 기반 DAY2 모델 평가 보고서 추가`

@@ -50,6 +50,8 @@ Batch 1은 학습, 교차검증, Hold-out 검증 및 모델 선택에만 사용�
 ├── reports/
 │   ├── DS-MINI-Design-울산_1반-김낙근_day1_v6.pdf
 │   ├── DS-MINI-Design-울산_1반-김낙근_day1_v6.pptx
+│   ├── DS-MINI-Design-울산_1반-김낙근_final_v2.pdf
+│   ├── DS-MINI-Design-울산_1반-김낙근_final_v2.pptx
 │   └── report_source/
 ├── requirements.txt
 └── README.md
