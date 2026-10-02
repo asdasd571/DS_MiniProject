@@ -817,3 +817,36 @@
 ### Candidate Commit Message
 
 `♻️[REF] README 기준 EDA와 모델링 코드 동기화`
+
+## Step 25. 모델 선택 근거를 개인 판단과 도메인 기여 중심으로 수정
+
+상태: [x] 완료
+
+### 수행 내용
+
+- Gradient Boosting 선택 이유를 Hold-out 성능 최솟값 중심 설명에서 EDA 가설과 개인 판단 중심으로 변경했다.
+- ΔQ(V), 초기 용량 변화와 충전조건의 조합이 비선형 관계를 만들며, Boosting이 작은 열화 차이를 순차적으로 보완할 수 있다고 판단한 과정을 작성했다.
+- Linear Regression과 ElasticNet을 최종 모델 경쟁자가 아니라 선형 관계와 다중공선성 대응 여부를 확인하는 비교 기준으로 정리했다.
+- CV와 Hold-out 성능은 선택의 유일한 원인이 아니라 모델 가설이 실제 데이터에서 작동하는지 확인하는 근거로 역할을 변경했다.
+- 코드의 자동 최저 Hold-out 선택을 제거하고 EDA 전략에 따라 `GradientBoosting`을 명시적으로 주 모델로 설정했다.
+- README, Modeling Notebook, 자동 생성 DAY2 보고서와 모델 메타데이터를 같은 논리로 동기화했다.
+
+### 테스트 결과
+
+- 세 Notebook 재생성 및 실행 완료
+- 전체 학습·평가 파이프라인 재실행 완료
+- 결과 검증 스크립트 통과
+- Python 문법 검사 통과
+- 세 Notebook 실행 오류 0건 확인
+- 모델 메타데이터의 EDA 가설 기반 선택 정책 확인
+- `git diff --check` 통과
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`♻️[REF] 모델 선택 기준을 EDA 가설 중심으로 개선`

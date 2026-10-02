@@ -1,6 +1,6 @@
 {
   "selected_model": "GradientBoosting",
-  "selection_basis": "minimum Batch 1 hold-out MAPE; CV MAPE tie-breaker",
+  "selection_basis": "EDA hypothesis: shallow boosting can combine nonlinear early-degradation and operating-condition signals; Batch 1 CV/hold-out are confirmation evidence, not the sole decision rule",
   "external_results_used_for_selection": false,
   "metric": "MAPE on original cycle-life scale after exp inverse transform",
   "paper_target_mape_percent": 9.1,

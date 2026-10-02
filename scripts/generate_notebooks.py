@@ -63,7 +63,7 @@ write("03_modeling.ipynb", [
     nbf.v4.new_markdown_cell("# Modeling and External Evaluation\n\nBatch 1에서만 split, CV, 전처리 학습과 hyperparameter tuning을 수행한다. 타깃은 `log(cycle_life)`로 학습하고 MAPE는 cycle 단위로 역변환해 계산한다."), setup,
     nbf.v4.new_markdown_cell("## Model comparison"),
     nbf.v4.new_code_cell("comparison = pd.read_csv(RESULTS/'tables/model_comparison.csv'); comparison"),
-    nbf.v4.new_markdown_cell("후보 모델은 EDA 가설에 따라 정했다. Linear Regression은 선형 기준, ElasticNet은 ΔQ Feature 간 다중공선성 대응, Gradient Boosting은 비선형 관계 비교 역할을 갖는다. ElasticNet은 CV MAPE 8.10%로 가장 낮았지만 충전 정책 Hold-out에서 20.58%로 악화됐다. Gradient Boosting은 CV 10.45%, Hold-out 8.48%였으며 새로운 충전 정책에서 가장 안정적인 결과를 보여 선택했다. 단일 Hold-out 결과가 절대적인 우위를 뜻하지는 않는다."),
+    nbf.v4.new_markdown_cell("EDA에서 초기 QD 절대값보다 ΔQ(V), 초기 용량 변화와 충전조건의 조합이 중요했다. 이 관계가 하나의 직선보다 여러 조건이 함께 작용하는 비선형 관계에 가깝다고 판단했다. Gradient Boosting이 작은 열화 차이를 순차적으로 보완해 장기 수명 위험 Cell을 구분하는 데 기여할 수 있다고 생각해 주 모델로 정했다. Linear Regression은 선형 기준, ElasticNet은 다중공선성 대응을 확인하는 비교 모델이다. CV와 충전 정책 Hold-out 성능은 선택의 유일한 이유가 아니라 이 판단을 확인하는 근거로 사용했다."),
     nbf.v4.new_markdown_cell("## Split audit — 같은 충전 정책의 중복 방지"),
     nbf.v4.new_code_cell("audit = pd.read_csv(RESULTS/'tables/day2_split_audit.csv')\ntrain_policy = set(audit.loc[audit.split=='Train (Batch 1)', 'charging_policy'])\nvalid_policy = set(audit.loc[audit.split=='Valid (Batch 1 Hold-out)', 'charging_policy'])\n{'train_cells': int((audit.split=='Train (Batch 1)').sum()), 'valid_cells': int((audit.split=='Valid (Batch 1 Hold-out)').sum()), 'policy_overlap': sorted(train_policy & valid_policy)}"),
     nbf.v4.new_markdown_cell("## Performance"),

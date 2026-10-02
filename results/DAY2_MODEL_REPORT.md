@@ -2,9 +2,9 @@
 
 ## 모델 선택
 
-후보 모델은 EDA에서 확인한 데이터 특성에 따라 정했다. Linear Regression은 선형 기준, ElasticNet은 ΔQ 파생 Feature의 다중공선성 대응, Gradient Boosting은 비선형 관계 비교에 사용했다.
+EDA에서 초기 QD 절대값보다 ΔQ(V), 용량 변화와 충전조건의 조합이 수명 차이를 설명하는 데 중요하다고 판단했다. 나는 이 관계가 하나의 직선보다 여러 조건이 함께 작용하는 비선형 관계에 가깝다고 보았다. Gradient Boosting이 작은 열화 차이를 순차적으로 보완해 장기 수명 위험 Cell을 구분하는 데 기여할 수 있다고 생각해 주 모델로 정했다.
 
-Batch 1만 사용해 후보 모델과 하이퍼파라미터를 비교했다. CV MAPE로 평균적인 안정성을 확인하고, 충전 정책이 겹치지 않는 Hold-out MAPE로 새로운 운전조건에 대한 성능을 확인했다. ElasticNet은 CV 성능이 가장 낮았지만 Hold-out에서 악화됐고, **GradientBoosting**이 Hold-out에서 가장 안정적인 결과를 보여 최종 선택했다. Batch 2와 Batch 3 결과는 선택이나 재튜닝에 사용하지 않았다.
+Linear Regression은 선형 기준, ElasticNet은 다중공선성 대응 여부를 확인하는 비교 모델로 사용했다. Batch 1 CV와 충전 정책 Hold-out은 이 판단이 실제 데이터에서도 무리 없이 작동하는지 확인하는 근거로 사용했다. 작은 데이터에서 복잡도를 억제하기 위해 깊이 1의 얕은 Tree를 사용했다. Batch 2와 Batch 3 결과는 선택이나 재튜닝에 사용하지 않았다.
 
 ## 성능 보고
 
