@@ -1,0 +1,38 @@
+{
+  "input_x": [
+    "log_dq_var",
+    "dq_mean",
+    "dq_min",
+    "dq_range",
+    "qd_10",
+    "qd_100",
+    "qd_slope_10_100",
+    "ir_10",
+    "ir_change_10_100",
+    "tavg_mean_10_100",
+    "tmax_max_10_100",
+    "charge_time_mean_10_100",
+    "first_c_rate",
+    "switch_soc",
+    "second_c_rate"
+  ],
+  "raw_target_y": "cycle_life",
+  "model_target": "log(cycle_life)",
+  "forbidden_model_features": [
+    "cycle_life",
+    "knee_cycle",
+    "knee_fraction"
+  ],
+  "candidate_models": [
+    "LinearRegression",
+    "ElasticNet",
+    "GradientBoosting"
+  ],
+  "selection_data": "Batch1 train/validation only",
+  "validation_group": "charging_policy",
+  "external_evaluation": [
+    "Batch2",
+    "Batch3"
+  ],
+  "external_results_used_for_tuning": false
+}

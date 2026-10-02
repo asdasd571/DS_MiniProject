@@ -171,14 +171,21 @@ Batch 1은 충전 정책 기반 `GroupShuffleSplit`으로 학습 영역과 Hold-
 
 ### 최종 모델 성능
 
-| 평가 구분 | MAPE | 비고 |
+| 구분 | MAPE (%) | 비고 |
 |---|---:|---|
-| Batch 1 교차검증 | 10.45% | 모델 선택 과정의 평균 성능 |
-| Batch 1 Hold-out | 8.48% | 학습에서 보지 못한 충전 정책 |
-| Batch 2 외부 테스트 | 37.01% | 단수명 분포, 튜닝 미사용 |
-| Batch 3 추가 외부 테스트 | 16.93% | 장수명 분포, 튜닝 미사용 |
+| Train (Batch 1 CV) | 10.45% | Batch 1 학습 영역의 GroupKFold 평균 |
+| Valid (Batch 1 Hold-out) | 8.48% | 학습에서 보지 못한 충전 정책 |
+| Test (Batch 2) | 37.01% | 필수 외부 평가, 튜닝 미사용 |
+| Gap (Train-Valid) | -1.98%p | 양수가 클수록 과적합 의심 |
+| Gap (Valid-Test) | +28.53%p | 배치 간 일반화 저하 확인 |
+| Gap (Target-Test) | +27.91%p | 원논문 Target 9.1% 대비 |
+| Test (Batch 3) | 16.93% | 추가 외부 평가, 튜닝 미사용 |
+| Gap (Batch2-Batch3) | -20.07%p | Batch 3 MAPE − Batch 2 MAPE |
+| Gap (Target-Batch3) | +7.83%p | 원논문 Target 9.1% 대비 |
 
-Batch 1 내부 검증에서는 양호한 성능을 보였지만 Batch 2에서 MAPE가 37.01%로 증가했다. 현재의 엄격한 Batch 1 전용 학습과 Batch 2 외부평가 조건에서는 논문의 9.1% 수준을 재현하지 못했다.
+Batch 1 내부 검증에서는 양호한 성능을 보였지만 Batch 2에서 MAPE가 37.01%로 증가했다. Batch 2는 Batch 1에 없던 500 Cycle 미만 Cell이 많아 외삽 오류가 크게 나타났으며, 현재의 엄격한 Batch 1 전용 학습과 Batch 2 외부평가 조건에서는 논문의 9.1% 수준을 재현하지 못했다. Batch 3 MAPE는 16.93%지만, Batch 2 결과와 비교해 모델을 다시 고르거나 Feature를 수정하지 않았다.
+
+재현 가능한 DAY 2 표와 오류 요약은 `results/DAY2_MODEL_REPORT.md`, `results/tables/day2_performance_report.csv`, `results/tables/day2_error_analysis_summary.csv`에서 확인할 수 있다.
 
 ## 오류 분석
 

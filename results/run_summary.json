@@ -2,6 +2,10 @@
   "dq_pearson": -0.8858470823514537,
   "dq_spearman": -0.8797804720203246,
   "selected_model": "GradientBoosting",
+  "selection_basis": "minimum Batch 1 hold-out MAPE; CV MAPE tie-breaker",
+  "external_results_used_for_selection": false,
+  "metric": "MAPE on original cycle-life scale after exp inverse transform",
+  "paper_target_mape_percent": 9.1,
   "features": [
     "log_dq_var",
     "dq_mean",
@@ -19,7 +23,13 @@
     "switch_soc",
     "second_c_rate"
   ],
+  "target_feature_forbidden": "cycle_life",
   "split_method": "GroupShuffleSplit by charging_policy",
+  "train_cells": 31,
+  "holdout_cells": 10,
+  "train_policy_count": 17,
+  "holdout_policy_count": 5,
+  "policy_overlap": [],
   "model_comparison": [
     {
       "model": "LinearRegression",
@@ -42,5 +52,119 @@
       "valid_mape": 8.4761812180986,
       "best_params": "{\"model__learning_rate\": 0.1, \"model__max_depth\": 1, \"model__n_estimators\": 100}"
     }
-  ]
+  ],
+  "day1_report": {
+    "summary": [
+      {
+        "batch": "Batch1",
+        "n": 41,
+        "mean": 838.5853658536586,
+        "median": 842.0,
+        "std": 194.8927879129646,
+        "min": 534.0,
+        "max": 1227.0,
+        "short_n": 0,
+        "middle_n": 31,
+        "long_n": 10,
+        "short_pct": 0.0,
+        "middle_pct": 75.60975609756098,
+        "long_pct": 24.390243902439025
+      },
+      {
+        "batch": "Batch2",
+        "n": 34,
+        "mean": 550.7058823529412,
+        "median": 468.5,
+        "std": 221.64119645126755,
+        "min": 392.0,
+        "max": 1186.0,
+        "short_n": 26,
+        "middle_n": 5,
+        "long_n": 3,
+        "short_pct": 76.47058823529412,
+        "middle_pct": 14.705882352941176,
+        "long_pct": 8.823529411764707
+      },
+      {
+        "batch": "Batch3",
+        "n": 40,
+        "mean": 1032.0,
+        "median": 964.5,
+        "std": 308.5984030402205,
+        "min": 541.0,
+        "max": 1935.0,
+        "short_n": 0,
+        "middle_n": 21,
+        "long_n": 19,
+        "short_pct": 0.0,
+        "middle_pct": 52.5,
+        "long_pct": 47.5
+      }
+    ],
+    "high_pairs": [
+      {
+        "left": "dq_min",
+        "right": "dq_range",
+        "pearson": -0.999914913537269
+      },
+      {
+        "left": "dq_mean",
+        "right": "dq_range",
+        "pearson": -0.9927028372141139
+      },
+      {
+        "left": "dq_mean",
+        "right": "dq_min",
+        "pearson": 0.9926491605590356
+      },
+      {
+        "left": "log_dq_var",
+        "right": "dq_min",
+        "pearson": -0.9498395405029387
+      },
+      {
+        "left": "log_dq_var",
+        "right": "dq_range",
+        "pearson": 0.9490161493913875
+      }
+    ],
+    "strategy": {
+      "input_x": [
+        "log_dq_var",
+        "dq_mean",
+        "dq_min",
+        "dq_range",
+        "qd_10",
+        "qd_100",
+        "qd_slope_10_100",
+        "ir_10",
+        "ir_change_10_100",
+        "tavg_mean_10_100",
+        "tmax_max_10_100",
+        "charge_time_mean_10_100",
+        "first_c_rate",
+        "switch_soc",
+        "second_c_rate"
+      ],
+      "raw_target_y": "cycle_life",
+      "model_target": "log(cycle_life)",
+      "forbidden_model_features": [
+        "cycle_life",
+        "knee_cycle",
+        "knee_fraction"
+      ],
+      "candidate_models": [
+        "LinearRegression",
+        "ElasticNet",
+        "GradientBoosting"
+      ],
+      "selection_data": "Batch1 train/validation only",
+      "validation_group": "charging_policy",
+      "external_evaluation": [
+        "Batch2",
+        "Batch3"
+      ],
+      "external_results_used_for_tuning": false
+    }
+  }
 }

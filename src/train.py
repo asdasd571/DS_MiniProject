@@ -23,10 +23,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from .evaluation import error_table, mape_percent, save_prediction_plots
-from .features import extract_batch
+from .features import MODEL_FEATURES, extract_batch
 from .preprocess import BatteryBatchReader
 
 RANDOM_STATE = 42
+PAPER_REGRESSION_MAPE = 9.1
 # Cell indices documented by the authors' public Load Data notebook. Batch 2
 # entries are physical continuations of Batch 1 cells; Batch 3 entries are noisy.
 PAPER_EXCLUSIONS = {
@@ -34,13 +35,6 @@ PAPER_EXCLUSIONS = {
     "Batch2": {7: "paper exclusion: continuation of Batch1 cell", 8: "paper exclusion: continuation of Batch1 cell", 9: "paper exclusion: continuation of Batch1 cell", 15: "paper exclusion: continuation of Batch1 cell", 16: "paper exclusion: continuation of Batch1 cell"},
     "Batch3": {2: "paper exclusion: noisy channel", 23: "paper exclusion: noisy channel", 32: "paper exclusion: noisy channel", 37: "paper exclusion: noisy channel", 42: "paper exclusion: noisy channel", 43: "paper exclusion: noisy channel"},
 }
-MODEL_FEATURES = [
-    "log_dq_var", "dq_mean", "dq_min", "dq_range", "qd_10", "qd_100",
-    "qd_slope_10_100", "ir_10", "ir_change_10_100", "tavg_mean_10_100",
-    "tmax_max_10_100", "charge_time_mean_10_100", "first_c_rate", "switch_soc", "second_c_rate",
-]
-
-
 def _log_mape_scorer(estimator, x, y_log) -> float:
     return -mape_percent(np.exp(y_log), np.exp(estimator.predict(x)))
 
@@ -141,6 +135,15 @@ def modeling(frames, qualities, output: Path):
     else:
         train_idx, valid_idx = train_test_split(np.arange(len(b1)), test_size=.2, random_state=RANDOM_STATE); split_method = "random hold-out"
     train, holdout = b1.iloc[train_idx], b1.iloc[valid_idx]
+    train_policies = set(train.charging_policy.astype(str))
+    valid_policies = set(holdout.charging_policy.astype(str))
+    policy_overlap = sorted(train_policies & valid_policies)
+    if split_method.startswith("GroupShuffleSplit"):
+        assert not policy_overlap, "charging_policy leakage between train and hold-out"
+    pd.concat([
+        train[["cell_id", "charging_policy"]].assign(split="Train (Batch 1)"),
+        holdout[["cell_id", "charging_policy"]].assign(split="Valid (Batch 1 Hold-out)"),
+    ], ignore_index=True).to_csv(output / "tables" / "day2_split_audit.csv", index=False)
     cv = GroupKFold(n_splits=min(5, train.charging_policy.nunique())) if train.charging_policy.nunique() >= 3 else KFold(4, shuffle=True, random_state=RANDOM_STATE)
     cv_groups = train.charging_policy if isinstance(cv, GroupKFold) else None
     linear_pipe = Pipeline([("imputer", SimpleImputer(strategy="median")), ("scale", StandardScaler()), ("model", LinearRegression())])
@@ -161,26 +164,85 @@ def modeling(frames, qualities, output: Path):
         fitted[name] = search.best_estimator_
     comparison = pd.DataFrame(comparisons).sort_values(["valid_mape", "cv_mape"])
     comparison.to_csv(output / "tables" / "model_comparison.csv", index=False)
-    # Prefer the stable, interpretable regularized model when its hold-out score is
-    # close to the best candidate; do not select a tree from one favorable split alone.
-    best_valid = float(comparison.valid_mape.min())
-    elastic_row = comparison[comparison.model == "ElasticNet"].iloc[0]
-    selected_name = "ElasticNet" if float(elastic_row.valid_mape) <= best_valid + 3.0 else str(comparison.iloc[0].model)
+    # Selection stops before external evaluation. Batch 2/3 must not influence it.
+    selected_name = str(comparison.iloc[0].model)
     selected = clone(fitted[selected_name]).fit(b1[features], np.log(b1.cycle_life.to_numpy()))
     rows = [{"set": "Train (Batch 1 CV)", "mape_percent": float(comparison.set_index("model").loc[selected_name, "cv_mape"]), "note": selected_name}, {"set": "Valid (Batch 1 Hold-out)", "mape_percent": float(comparison.set_index("model").loc[selected_name, "valid_mape"]), "note": split_method}]
     predictions = {}
     for name in ("Batch2", "Batch3"):
         data = datasets[name]; pred = np.exp(selected.predict(data[features])); predictions[name] = pred
-        score = mape_percent(data.cycle_life.to_numpy(), pred); rows.append({"set": f"Test ({name})", "mape_percent": score, "note": "external batch; no tuning"})
+        score = mape_percent(data.cycle_life.to_numpy(), pred); rows.append({"set": f"Test ({name.replace('Batch', 'Batch ')})", "mape_percent": score, "note": "external batch; no tuning"})
         save_prediction_plots(data.cycle_life.to_numpy(), pred, name, output / "figures")
         error_table(data, pred).to_csv(output / "tables" / f"error_analysis_{name.lower()}.csv", index=False)
     perf = pd.DataFrame(rows)
     cv_score, val_score = perf.iloc[0].mape_percent, perf.iloc[1].mape_percent
     b2_score, b3_score = perf.iloc[2].mape_percent, perf.iloc[3].mape_percent
-    gaps = pd.DataFrame([{"set": "Gap Train-Valid", "mape_percent": val_score-cv_score, "note": "%p"}, {"set": "Gap Valid-Test", "mape_percent": b2_score-val_score, "note": "%p"}, {"set": "Gap Target-Test", "mape_percent": b2_score-9.1, "note": "%p vs paper target"}, {"set": "Gap Batch2-Batch3", "mape_percent": b3_score-b2_score, "note": "%p"}])
-    pd.concat([perf, gaps], ignore_index=True).to_csv(output / "model_performance.csv", index=False)
-    metadata = {"selected_model": selected_name, "features": features, "split_method": split_method, "model_comparison": comparisons}
+    report = pd.DataFrame([
+        rows[0], rows[1], rows[2],
+        {"set": "Gap (Train-Valid)", "mape_percent": val_score-cv_score, "note": "(+) : 과적합 의심"},
+        {"set": "Gap (Valid-Test)", "mape_percent": b2_score-val_score, "note": "(+) : 배치 간 일반화 저하 의심"},
+        {"set": "Gap (Target-Test)", "mape_percent": b2_score-PAPER_REGRESSION_MAPE, "note": "Target : 원논문 9.1%"},
+        rows[3],
+        {"set": "Gap (Batch2-Batch3)", "mape_percent": b3_score-b2_score, "note": "Test 성능 간 비교"},
+        {"set": "Gap (Target-Batch3)", "mape_percent": b3_score-PAPER_REGRESSION_MAPE, "note": "Batch 3 기준, 원논문 성능 비교"},
+    ])
+    report.to_csv(output / "model_performance.csv", index=False)
+    report.to_csv(output / "tables" / "day2_performance_report.csv", index=False)
+
+    error_summaries = []
+    for name in ("Batch2", "Batch3"):
+        errors = pd.read_csv(output / "tables" / f"error_analysis_{name.lower()}.csv")
+        worst = errors.iloc[0]
+        signed = errors.prediction - errors.cycle_life
+        error_summaries.append({
+            "batch": name.replace("Batch", "Batch "), "n_cells": len(errors),
+            "mape_percent": float(errors.absolute_percentage_error.mean()),
+            "median_ape_percent": float(errors.absolute_percentage_error.median()),
+            "mean_signed_error_cycles": float(signed.mean()),
+            "overprediction_rate_percent": float((signed > 0).mean() * 100),
+            "worst_cell": worst.cell_id, "worst_actual": float(worst.cycle_life),
+            "worst_prediction": float(worst.prediction),
+            "worst_ape_percent": float(worst.absolute_percentage_error),
+        })
+    pd.DataFrame(error_summaries).to_csv(output / "tables" / "day2_error_analysis_summary.csv", index=False)
+    metadata = {
+        "selected_model": selected_name,
+        "selection_basis": "minimum Batch 1 hold-out MAPE; CV MAPE tie-breaker",
+        "external_results_used_for_selection": False,
+        "metric": "MAPE on original cycle-life scale after exp inverse transform",
+        "paper_target_mape_percent": PAPER_REGRESSION_MAPE,
+        "features": features, "target_feature_forbidden": "cycle_life",
+        "split_method": split_method, "train_cells": int(len(train)),
+        "holdout_cells": int(len(holdout)), "train_policy_count": len(train_policies),
+        "holdout_policy_count": len(valid_policies), "policy_overlap": policy_overlap,
+        "model_comparison": comparisons,
+    }
     (output / "tables" / "model_metadata.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False))
+    summary = pd.DataFrame(error_summaries).set_index("batch")
+    markdown_rows = "\n".join(
+        f"| {row['set']} | {row['mape_percent']:.2f} | {row['note']} |"
+        for _, row in report.iterrows()
+    )
+    markdown_table = "| 구분 | MAPE (%) | 비고 |\n|---|---:|---|\n" + markdown_rows
+    report_md = f"""# DAY 2 모델 개발 및 평가
+
+## 모델 선택
+
+Batch 1만 사용해 후보 모델과 하이퍼파라미터를 비교했으며, Hold-out MAPE가 가장 낮은 **{selected_name}**을 선택했다. Batch 2와 Batch 3 결과는 선택이나 재튜닝에 사용하지 않았다.
+
+## 성능 보고
+
+{markdown_table}
+
+## 오류 분석
+
+- Batch 2 최대 오류 Cell: `{summary.loc['Batch 2', 'worst_cell']}` (APE {summary.loc['Batch 2', 'worst_ape_percent']:.1f}%)
+- Batch 2 과대예측 비율: {summary.loc['Batch 2', 'overprediction_rate_percent']:.1f}%
+- Batch 3 최대 오류 Cell: `{summary.loc['Batch 3', 'worst_cell']}` (APE {summary.loc['Batch 3', 'worst_ape_percent']:.1f}%)
+
+Batch 1 내부 검증과 외부 Batch의 차이는 배치별 수명 분포와 운전조건 차이에서 발생하는 일반화 문제로 해석한다. 특히 Batch 2는 Batch 1에 없던 단수명 영역이 많아 외삽 오류를 확인하는 핵심 테스트다.
+"""
+    (output / "DAY2_MODEL_REPORT.md").write_text(report_md, encoding="utf-8")
     return metadata
 
 
@@ -194,7 +256,15 @@ def main() -> None:
     frames, qualities, curves, degradation = extract_all({"Batch1": args.batch1, "Batch2": args.batch2, "Batch3": args.batch3}, output)
     insights = eda(frames, qualities, curves, degradation, output / "figures", output / "tables")
     metadata = modeling(frames, qualities, output)
-    (output / "run_summary.json").write_text(json.dumps({**insights, **metadata}, indent=2, ensure_ascii=False))
+    # Rebuild the five DAY1 report questions from the exact same extracted
+    # datasets.  Batch 2/3 values remain descriptive/external evidence only;
+    # this step does not feed them back into feature or model selection.
+    from scripts.build_day1_batch_evidence import build_day1_artifacts
+    day1 = build_day1_artifacts(
+        {"Batch1": args.batch1, "Batch2": args.batch2, "Batch3": args.batch3},
+        output,
+    )
+    (output / "run_summary.json").write_text(json.dumps({**insights, **metadata, "day1_report": day1}, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

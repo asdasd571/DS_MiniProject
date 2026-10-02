@@ -13,6 +13,15 @@ from .preprocess import BatteryCell, finite_count
 EPSILON = 1e-12
 POLICY_PATTERN = re.compile(r"([0-9.]+)C\(([0-9.]+)%\)-([0-9.]+)C", re.I)
 
+# Early-life inputs used by the modeling pipeline.  The target ``cycle_life``
+# is intentionally absent: every feature is available by cycle 100.
+MODEL_FEATURES = [
+    "log_dq_var", "dq_mean", "dq_min", "dq_range", "qd_10", "qd_100",
+    "qd_slope_10_100", "ir_10", "ir_change_10_100", "tavg_mean_10_100",
+    "tmax_max_10_100", "charge_time_mean_10_100", "first_c_rate", "switch_soc",
+    "second_c_rate",
+]
+
 
 def parse_policy(policy: str) -> tuple[float, float, float]:
     match = POLICY_PATTERN.search(policy.replace(" ", ""))

@@ -583,3 +583,51 @@
 ### Candidate Commit Message
 
 `📊[REF] DAY1 Batch 비교형 EDA와 모델 전략 개편`
+
+## Step 18. DAY2 모델 개발 및 외부 Batch 평가 코드화
+
+상태: [x] 완료
+
+### 수행 내용
+
+- Batch 1의 충전 정책 기반 Hold-out과 GroupKFold에서 Linear Regression, ElasticNet, Gradient Boosting을 비교했다.
+- Batch 1 Hold-out MAPE를 기준으로 Gradient Boosting을 선택하고, 그 이후 Batch 2·3는 튜닝 없이 외부 평가에만 사용했다.
+- Train/Hold-out의 `charging_policy` 중복 여부를 자동 검증하고 분리 내역을 저장했다.
+- 과제 형식에 맞춰 Train, Valid, Test, 세 가지 Gap과 Batch 3 추가 평가를 동일한 CSV와 Markdown 보고서로 생성했다.
+- Batch 2·3의 최대 오류 Cell, 중앙 APE, 예측 편향 및 과대예측 비율을 자동 집계했다.
+- DAY1 보고서 그래프도 동일한 Feature 추출 코드에서 재생성되도록 전체 파이프라인에 연결했다.
+
+### 실행 및 테스트 결과
+
+- 선택 모델: Gradient Boosting (`learning_rate=0.1`, `max_depth=1`, `n_estimators=100`)
+- Train (Batch 1 CV) MAPE: 10.45%
+- Valid (Batch 1 Hold-out) MAPE: 8.48%
+- Test (Batch 2) MAPE: 37.01%
+- Test (Batch 3) MAPE: 16.93%
+- Train/Hold-out 충전 정책 중복: 0개
+- Batch 2 원논문 Target 대비 Gap: +27.91%p
+- Batch 3 원논문 Target 대비 Gap: +7.83%p
+
+### 생성/갱신 파일
+
+- `src/train.py`
+- `src/features.py`
+- `scripts/build_day1_batch_evidence.py`
+- `scripts/validate_results.py`
+- `results/model_performance.csv`
+- `results/DAY2_MODEL_REPORT.md`
+- `results/tables/day2_performance_report.csv`
+- `results/tables/day2_split_audit.csv`
+- `results/tables/day2_error_analysis_summary.csv`
+- `results/tables/model_metadata.json`
+- `README.md`
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`✨[FEAT] DAY2 모델 평가와 외부 Batch 검증 자동화`

@@ -10,13 +10,17 @@ import argparse
 import json
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib import font_manager
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from scipy.stats import pearsonr, spearmanr
 
-from src.features import extract_batch
+from src.features import MODEL_FEATURES, extract_batch
 from src.preprocess import BatteryBatchReader
-from src.train import MODEL_FEATURES
 
 
 BATCH_PATHS = {
@@ -86,13 +90,119 @@ def histogram_counts(values: pd.Series) -> dict[str, list[float | int]]:
     return {"centers": centers.tolist(), "counts": counts.astype(int).tolist(), "edges": edges.tolist()}
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--archive", type=Path, default=Path("/Users/nak/Downloads/archive"))
-    parser.add_argument("--results", type=Path, default=Path("results"))
-    args = parser.parse_args()
-    table_dir = args.results / "tables"
+def _report_style() -> None:
+    pretendard = Path.home() / "Library" / "Fonts" / "Pretendard-Regular.otf"
+    if pretendard.exists():
+        font_manager.fontManager.addfont(pretendard)
+    available = {font.name for font in font_manager.fontManager.ttflist}
+    family = next((name for name in ("Pretendard", "Apple SD Gothic Neo", "NanumGothic") if name in available), "DejaVu Sans")
+    sns.set_theme(style="whitegrid", context="talk")
+    plt.rcParams.update({
+        "font.family": family, "axes.unicode_minus": False,
+        "figure.facecolor": "white", "axes.facecolor": "white",
+        "axes.edgecolor": "#D7E3E8", "grid.color": "#E3EBEF",
+        "axes.titleweight": "bold", "axes.titlesize": 14,
+        "axes.labelsize": 12, "xtick.labelsize": 10, "ytick.labelsize": 10,
+        "legend.fontsize": 9,
+    })
+
+
+def build_report_figures(
+    valid: dict[str, pd.DataFrame],
+    curves: dict[str, dict[str, tuple[np.ndarray, np.ndarray]]],
+    degradation: dict[str, dict[str, np.ndarray]],
+    payload: dict[str, object],
+    figure_dir: Path,
+) -> None:
+    """Generate the five report figures from the same evidence payload."""
+    _report_style()
+    figure_dir.mkdir(parents=True, exist_ok=True)
+    colors = {"Batch1": "#2F73B7", "Batch2": "#F28C28", "Batch3": "#009B96"}
+    batches = tuple(BATCH_PATHS)
+
+    # EDA 01: identical bins and axes for the three Cycle Life distributions.
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5), sharex=True, sharey=True)
+    bins = np.arange(150, 2401, 150)
+    for ax, batch in zip(axes, batches):
+        values = valid[batch].cycle_life
+        ax.hist(values, bins=bins, color=colors[batch], edgecolor="white", alpha=.9)
+        ax.axvline(500, color="#F28C28", linestyle="--", linewidth=1.5)
+        ax.axvline(1000, color="#009B96", linestyle="--", linewidth=1.5)
+        ax.set(title=batch, xlabel="Cycle Life", xlim=(150, 2300))
+    axes[0].set_ylabel("Cell count")
+    fig.suptitle("EDA 01 | Batch별 Cycle Life 분포", fontsize=18, fontweight="bold")
+    fig.tight_layout(); fig.savefig(figure_dir / "day1_eda01_cycle_life_by_batch.png", dpi=200); plt.close(fig)
+
+    # EDA 02: all valid QD curves over the full life and the first 100 cycles.
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharey=True)
+    for column, batch in enumerate(batches):
+        data = valid[batch].set_index("cell_id")
+        median_life = data.cycle_life.median()
+        highlight = (data.cycle_life - median_life).abs().idxmin()
+        for cell_id in data.index:
+            qd = np.asarray(degradation[batch].get(cell_id, []), dtype=float)
+            if not len(qd):
+                continue
+            style = {"color": colors[batch], "linewidth": 2.2, "alpha": .95} if cell_id == highlight else {"color": "#B9C9D2", "linewidth": .7, "alpha": .55}
+            axes[0, column].plot(np.arange(1, len(qd) + 1), qd, **style)
+            axes[1, column].plot(np.arange(1, min(100, len(qd)) + 1), qd[:100], **style)
+        axes[0, column].set(title=f"{batch} | 전체", xlim=(0, 2300), ylim=(.75, 1.15))
+        axes[1, column].set(title=f"{batch} | 초기 100", xlim=(0, 100), ylim=(.75, 1.15), xlabel="Cycle")
+    axes[0, 0].set_ylabel("QD (Ah)"); axes[1, 0].set_ylabel("QD (Ah)")
+    fig.suptitle("EDA 02 | 전체 수명 열화와 초기 100 Cycle", fontsize=18, fontweight="bold")
+    fig.tight_layout(); fig.savefig(figure_dir / "day1_eda02_qd_degradation_by_batch.png", dpi=200); plt.close(fig)
+
+    # EDA 03: representative ΔQ(V) curves plus the key log-variance relation.
+    group_colors = {"단수명": "#F28C28", "중간": "#2F73B7", "장수명": "#009B96"}
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8))
+    for column, batch in enumerate(batches):
+        report = payload["batches"][batch]
+        for item in report["delta_q_representatives"]:
+            axes[0, column].plot(item["x"], item["y"], label=f'{item["group"]} ({item["life"]:.0f})', color=group_colors[item["group"]], linewidth=2)
+        axes[0, column].set(title=f"{batch} | ΔQ(V)", xlim=(2.0, 3.6), ylim=(-.12, .12), xlabel="Voltage (V)", ylabel="ΔQ (Ah)")
+        axes[0, column].legend()
+        sns.regplot(data=valid[batch], x="log_dq_var", y="cycle_life", ax=axes[1, column], color=colors[batch], scatter_kws={"s": 28, "alpha": .85}, line_kws={"linestyle": "--"})
+        r = report["delta_q_scatter"]["pearson"]
+        axes[1, column].set(title=f"{batch} | Pearson r={r:+.2f}", xlabel="log10 Var(ΔQ)", ylabel="Cycle Life", xlim=(-5.5, -3.0), ylim=(150, 2300))
+    fig.suptitle("EDA 03 | 초기 ΔQ(V)와 장기 Cycle Life", fontsize=18, fontweight="bold")
+    fig.tight_layout(); fig.savefig(figure_dir / "day1_eda03_delta_q_by_batch.png", dpi=200); plt.close(fig)
+
+    # EDA 04: protocol means and the first C-rate relationship.
+    fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+    for column, batch in enumerate(batches):
+        report = payload["batches"][batch]
+        policies = pd.DataFrame(report["charging_policy"]).sort_values("mean")
+        labels = [label.replace("-newstructure", "") for label in policies.label]
+        axes[0, column].barh(labels, policies["mean"], color=colors[batch])
+        axes[0, column].set(title=f"{batch} | Protocol 평균", xlabel="Mean Cycle Life", xlim=(0, 2000))
+        sns.regplot(data=valid[batch], x="first_c_rate", y="cycle_life", ax=axes[1, column], color=colors[batch], scatter_kws={"s": 28, "alpha": .85}, line_kws={"linestyle": "--"})
+        r = report["relationships"]["first_c_rate"]["pearson"]
+        axes[1, column].set(title=f"{batch} | Pearson r={r:+.2f}", xlabel="First C-rate", ylabel="Cycle Life", xlim=(3, 8.5), ylim=(150, 2300))
+    fig.suptitle("EDA 04 | 충전 Protocol, C-rate와 수명", fontsize=18, fontweight="bold")
+    fig.tight_layout(); fig.savefig(figure_dir / "day1_eda04_charging_by_batch.png", dpi=200); plt.close(fig)
+
+    # EDA 05: target correlation across batches and Batch 1 collinearity.
+    selected = ["log_dq_var", "dq_mean", "dq_min", "dq_range", "qd_slope_10_100", "qd_10", "first_c_rate", "ir_change_10_100"]
+    target_matrix = pd.DataFrame({batch: [payload["batches"][batch]["feature_target"][feature]["pearson"] for feature in selected] for batch in batches}, index=selected)
+    b1_corr = valid["Batch1"][selected].corr()
+    fig, axes = plt.subplots(1, 2, figsize=(15, 7), gridspec_kw={"width_ratios": [1, 1.5]})
+    sns.heatmap(target_matrix, annot=True, fmt=".2f", cmap="RdBu_r", center=0, vmin=-1, vmax=1, ax=axes[0], cbar=False)
+    axes[0].set_title("Feature ↔ Cycle Life")
+    sns.heatmap(b1_corr, annot=True, fmt=".2f", cmap="RdBu_r", center=0, vmin=-1, vmax=1, ax=axes[1], cbar=False)
+    axes[1].set_title("Batch 1 Feature 간 상관")
+    fig.suptitle("EDA 05 | Target 관계와 다중공선성", fontsize=18, fontweight="bold")
+    fig.tight_layout(); fig.savefig(figure_dir / "day1_eda05_correlation_strategy.png", dpi=200); plt.close(fig)
+
+
+def build_day1_artifacts(archive: Path | dict[str, Path], results: Path) -> dict[str, object]:
+    """Rebuild every table and figure cited by the DAY1 report."""
+    table_dir = results / "tables"
     table_dir.mkdir(parents=True, exist_ok=True)
+    batch_paths = (
+        {batch: Path(path) for batch, path in archive.items()}
+        if isinstance(archive, dict)
+        else {batch: Path(archive) / filename for batch, filename in BATCH_PATHS.items()}
+    )
 
     frames: dict[str, pd.DataFrame] = {}
     qualities: dict[str, pd.DataFrame] = {}
@@ -100,13 +210,13 @@ def main() -> None:
     degradation: dict[str, dict[str, np.ndarray]] = {}
     valid: dict[str, pd.DataFrame] = {}
 
-    for batch, filename in BATCH_PATHS.items():
-        frames[batch] = pd.read_csv(args.results / f"feature_dataset_{batch.lower()}.csv")
+    for batch in BATCH_PATHS:
+        frames[batch] = pd.read_csv(results / f"feature_dataset_{batch.lower()}.csv")
         qualities[batch] = pd.read_csv(table_dir / f"quality_report_{batch.lower()}.csv")
         ids = set(qualities[batch].loc[qualities[batch].valid_for_model, "cell_id"])
         valid[batch] = frames[batch][frames[batch].cell_id.isin(ids)].copy().reset_index(drop=True)
         _, _, curves[batch], degradation[batch] = extract_batch(
-            BatteryBatchReader(args.archive / filename, batch).iter_cells()
+            BatteryBatchReader(batch_paths[batch], batch).iter_cells()
         )
 
     payload: dict[str, object] = {"source": "repository preprocessing and feature CSVs", "batches": {}}
@@ -261,7 +371,29 @@ def main() -> None:
     pd.DataFrame(summary_rows).to_csv(table_dir / "day1_batch_summary.csv", index=False)
     pd.DataFrame(shortest_rows).to_csv(table_dir / "day1_shortest_cells.csv", index=False)
     pd.DataFrame(relation_rows).to_csv(table_dir / "day1_relationships.csv", index=False)
-    print(json.dumps({"summary": summary_rows, "high_pairs": pairs[:5]}, ensure_ascii=False, indent=2))
+    strategy = {
+        "input_x": MODEL_FEATURES,
+        "raw_target_y": "cycle_life",
+        "model_target": "log(cycle_life)",
+        "forbidden_model_features": ["cycle_life", "knee_cycle", "knee_fraction"],
+        "candidate_models": ["LinearRegression", "ElasticNet", "GradientBoosting"],
+        "selection_data": "Batch1 train/validation only",
+        "validation_group": "charging_policy",
+        "external_evaluation": ["Batch2", "Batch3"],
+        "external_results_used_for_tuning": False,
+    }
+    (table_dir / "day1_model_strategy.json").write_text(json.dumps(strategy, ensure_ascii=False, indent=2))
+    build_report_figures(valid, curves, degradation, payload, results / "figures")
+    return {"summary": summary_rows, "high_pairs": pairs[:5], "strategy": strategy}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--archive", type=Path, default=Path("/Users/nak/Downloads/archive"))
+    parser.add_argument("--results", type=Path, default=Path("results"))
+    args = parser.parse_args()
+    report = build_day1_artifacts(args.archive, args.results)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

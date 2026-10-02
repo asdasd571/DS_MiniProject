@@ -1,5 +1,9 @@
 {
   "selected_model": "GradientBoosting",
+  "selection_basis": "minimum Batch 1 hold-out MAPE; CV MAPE tie-breaker",
+  "external_results_used_for_selection": false,
+  "metric": "MAPE on original cycle-life scale after exp inverse transform",
+  "paper_target_mape_percent": 9.1,
   "features": [
     "log_dq_var",
     "dq_mean",
@@ -17,7 +21,13 @@
     "switch_soc",
     "second_c_rate"
   ],
+  "target_feature_forbidden": "cycle_life",
   "split_method": "GroupShuffleSplit by charging_policy",
+  "train_cells": 31,
+  "holdout_cells": 10,
+  "train_policy_count": 17,
+  "holdout_policy_count": 5,
+  "policy_overlap": [],
   "model_comparison": [
     {
       "model": "LinearRegression",
