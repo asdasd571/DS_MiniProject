@@ -1,8 +1,10 @@
 # ESS 배터리 수명 예측
 
-MIT-Stanford Battery Dataset의 초기 100회 충·방전 데이터를 이용해 배터리 Cell의 전체 Cycle Life를 예측하는 프로젝트다. 배터리가 수명 종료에 도달하기 전에 초기 열화 신호를 분석하여 단수명 위험 Cell을 조기에 식별하고, ESS의 예방 정비와 교체 계획에 활용할 수 있는 수명 예측 가능성을 검토한다.
+## 프로젝트 목적
 
-EDA에서 확인한 용량 변화, ΔQ(V), 내부저항, 온도, 충전시간 및 충전 정책을 Cell 단위 Feature로 구성하고, Batch 1에서 모델을 선택한 뒤 Batch 2와 Batch 3에서 외부 일반화 성능을 평가한다.
+이 프로젝트의 목적은 MIT-Stanford Battery Dataset의 초기 100회 충·방전 데이터로 각 배터리 Cell의 전체 Cycle Life를 예측하는 것이다. 수명 종료까지 기다리지 않고 초기 열화 신호로 단수명 위험 Cell을 미리 찾아낼 수 있는지 확인하고, 그 결과를 ESS의 예방 정비와 교체 계획에 활용할 가능성을 검토한다.
+
+이를 위해 초기 용량 변화, ΔQ(V), 내부저항, 온도, 충전시간과 충전 조건을 Cell 단위 Feature로 구성한다. 모델과 하이퍼파라미터는 Batch 1 안에서만 선택하고, Batch 2를 필수 외부 테스트로 사용한다. Batch 3는 서로 다른 수명 분포에서도 성능이 유지되는지 확인하기 위한 추가 테스트로 사용한다.
 
 ## 프로젝트 개요
 
@@ -34,16 +36,20 @@ Batch 1은 학습, 교차검증, Hold-out 검증 및 모델 선택에만 사용�
 │   ├── evaluation.py
 │   └── train.py
 ├── scripts/
+│   ├── build_day1_batch_evidence.py
+│   ├── generate_notebooks.py
 │   └── validate_results.py
 ├── results/
 │   ├── figures/
 │   ├── tables/
+│   ├── DAY2_MODEL_REPORT.md
 │   ├── feature_dataset_batch1.csv
 │   ├── feature_dataset_batch2.csv
 │   ├── feature_dataset_batch3.csv
 │   └── model_performance.csv
 ├── reports/
-│   ├── DS-MINI-Design-울산_1반-김낙근.pdf
+│   ├── DS-MINI-Design-울산_1반-김낙근_day1_v6.pdf
+│   ├── DS-MINI-Design-울산_1반-김낙근_day1_v6.pptx
 │   └── report_source/
 ├── requirements.txt
 └── README.md

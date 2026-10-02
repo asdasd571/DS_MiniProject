@@ -631,3 +631,31 @@
 ### Candidate Commit Message
 
 `✨[FEAT] DAY2 모델 평가와 외부 Batch 검증 자동화`
+
+## Step 19. 프로젝트 README 최종 구성 정리
+
+상태: [x] 완료
+
+### 수행 내용
+
+- 과제 양식에 맞춰 프로젝트 목적을 별도 항목으로 구체화했다.
+- Regression 과제, Batch 1 학습, Batch 2 필수 평가, Batch 3 추가 평가 구조를 명확히 했다.
+- 실제 Repository와 일치하도록 소스, 스크립트, 결과 및 보고서 파일 구조를 갱신했다.
+- EDA, Feature Engineering, 모델 선택, 성능표, 오류 분석, ESS 활용 및 한계를 하나의 README 흐름으로 정리했다.
+- 팀 구성을 김낙근 1인 프로젝트로 유지했다.
+
+### 테스트 결과
+
+- README 성능 수치와 `results/model_performance.csv` 일치 확인
+- Markdown 제목, 표, 코드 블록 구조 확인
+- `git diff --check` 통과
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📝[DOCS] ESS 배터리 수명 예측 README 정리`
