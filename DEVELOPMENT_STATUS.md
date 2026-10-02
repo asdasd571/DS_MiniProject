@@ -728,3 +728,59 @@
 ### Candidate Commit Message
 
 `📊[DOCS] README 기반 DAY2 모델 평가 보고서 추가`
+
+## Step 22. 모델 선택 근거의 분석 과정 중심 개편
+
+상태: [x] 완료
+
+### 수행 내용
+
+- 모델 선택 이유를 단순 성능 순위 나열에서 EDA 기반 가설과 검증 과정 중심으로 수정했다.
+- Linear Regression, ElasticNet, Gradient Boosting을 후보로 둔 이유를 데이터 특성과 연결했다.
+- 교차검증은 평균적인 안정성, 충전 정책 Hold-out은 새로운 운전조건에 대한 성능을 확인하는 기준으로 구분했다.
+- Gradient Boosting을 선택한 이유와 `max_depth=1`로 복잡도를 제한한 판단을 명시했다.
+- Batch 2·3 결과를 모델 선택에 사용하지 않았으며, 외부 성능을 본 뒤 다시 튜닝하지 않았음을 강조했다.
+- 단일 Hold-out 결과의 한계와 Batch 2 일반화 실패를 함께 기록해 최종 모델을 절대적인 최적 모델로 표현하지 않았다.
+
+### 테스트 결과
+
+- README 성능 수치와 결과 CSV 일치 확인 완료
+- 결과 검증 스크립트 통과
+- Markdown 구조 및 `git diff --check` 확인 완료
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📝[DOCS] 모델 선택 근거를 검증 과정 중심으로 보완`
+
+## Step 23. README Knee 시점과 Protocol 평균 보강
+
+상태: [x] 완료
+
+### 수행 내용
+
+- Batch 1·2·3의 사후 Knee point 중앙값을 README 열화 곡선 분석에 추가했다.
+- Knee는 전체 수명 곡선을 사용하는 설명 지표이며 미래 정보 누수 때문에 모델 Feature에서 제외했음을 명시했다.
+- 각 Batch에서 표본이 가장 많은 대표 충전 Protocol의 평균 Cycle Life와 표본 수를 추가했다.
+- Protocol 평균 차이를 C-rate의 인과효과로 확대 해석하지 않도록 Batch 구성과 표본 수 차이를 함께 설명했다.
+
+### 테스트 결과
+
+- Knee 및 Protocol 수치를 `day1_batch_comparison.json`과 대조 완료
+- 결과 검증 스크립트 통과
+- `git diff --check` 통과
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`📝[DOCS] Knee 시점과 충전 Protocol 평균 보강`

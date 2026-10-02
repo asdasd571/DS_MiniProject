@@ -99,6 +99,8 @@ python scripts/validate_results.py
 - 장수명 Cell과 단수명 Cell의 초기 QD 곡선은 상당 부분 겹친다.
 - Cycle 10의 방전 용량인 `qd_10`과 Cycle Life의 Pearson 상관계수는 0.101로 낮다.
 - 초기 100 Cycle 구간에서는 명확한 Knee point를 안정적으로 식별하기 어려워 Knee point를 최종 Feature로 사용하지 않았다.
+- 전체 수명 QD 곡선에서 사후적으로 계산한 Knee point 중앙값은 Batch 1 549 Cycle, Batch 2 323 Cycle, Batch 3 753.5 Cycle이었다. Batch 2에서 급격한 열화가 상대적으로 일찍 시작되고 Batch 3에서는 늦게 시작되는 차이를 확인했다.
+- 이 Knee 시점은 수명 종료까지의 전체 곡선을 사용해 계산한 설명용 결과다. 예측 시점에 알 수 없는 미래 정보가 포함되므로 모델 입력 Feature에서는 제외했다.
 - Cycle 100 이후의 값은 미래 정보 누수를 막기 위해 Feature에 사용하지 않았다.
 - **핵심 발견:** 특정 시점의 용량 절대값보다 초기 구간의 용량 변화량과 열화 추세가 수명 예측에 더 적합하다.
 
@@ -117,6 +119,8 @@ python scripts/validate_results.py
 ### 충전 속도(C-rate)와 수명의 관계
 
 - 충전 정책 문자열을 `first_c_rate`, `switch_soc`, `second_c_rate`로 분해했다.
+- 표본이 가장 많은 대표 Protocol의 평균 Cycle Life는 Batch 1의 `3.6C(80%)-3.6C`가 1,182.0 Cycle(n=3), Batch 2의 `5.6C(26%)-4.5C`가 448.5 Cycle(n=6), Batch 3의 `5.3C(54%)-4C-newstructure`가 1,074.4 Cycle(n=8)이었다.
+- 대표 Protocol의 평균 수명 차이는 충전조건과 Batch 구성이 함께 달라질 때 수명 분포도 크게 달라질 수 있음을 보여준다. 다만 Protocol별 표본 수와 실험 구조가 다르므로 평균값의 차이를 C-rate만의 인과효과로 해석하지 않았다.
 - `first_c_rate`와 Cycle Life의 Pearson 상관계수는 약 -0.577이다.
 - 정책별 표본 수가 작고 온도, 충전시간 및 다른 운전조건이 함께 작용하므로 상관관계를 인과관계로 해석하지 않았다.
 - **핵심 발견:** Cell의 열화 상태뿐 아니라 충전 운전조건도 수명 예측 Feature와 검증 구조에 포함해야 한다.
@@ -160,12 +164,17 @@ EDA 결과를 바탕으로 다음 Feature를 구성했다.
   - `max_depth=1`
   - `n_estimators=100`
 - 선택 이유:
-  - ElasticNet의 Batch 1 교차검증 MAPE는 8.10%로 가장 낮았지만, 보지 못한 충전 정책으로 구성한 Hold-out에서 20.58%로 악화됐다.
-  - Gradient Boosting은 교차검증 MAPE 10.45%, Hold-out MAPE 8.48%로 새로운 충전 정책에서 가장 좋은 성능을 보였다.
-  - Tree 깊이를 1로 제한해 작은 정형 데이터셋에서 복잡도를 억제했다.
-  - 약 100개 Cell 규모의 작은 정형 데이터셋이므로 대규모 딥러닝은 과적합 위험 때문에 후보에서 제외했다.
+  - 후보 모델은 점수가 잘 나올 것 같은 알고리즘을 임의로 나열한 것이 아니라 EDA에서 확인한 데이터 특성에 맞춰 정했다. Linear Regression은 초기 열화 Feature와 수명의 선형 관계를 확인하는 기준 모델, ElasticNet은 ΔQ 파생 Feature 사이의 높은 상관관계를 조절하는 모델, Gradient Boosting은 초기 열화 신호와 수명 사이의 비선형 관계를 확인하는 모델로 사용했다.
+  - 모델은 하나의 성능값만으로 판단하지 않았다. Batch 1 교차검증 MAPE로 학습 데이터 안에서의 평균적인 안정성을 확인하고, 충전 정책이 겹치지 않는 Hold-out MAPE로 처음 보는 운전조건에 대한 성능을 함께 확인했다.
+  - ElasticNet은 교차검증 MAPE가 8.10%로 가장 낮았지만 Hold-out에서는 20.58%로 오차가 커졌다. 정규화된 선형 관계가 일부 Fold에서는 잘 작동했지만, 새로운 충전 정책에서도 같은 관계가 유지된다고 보기 어려웠다.
+  - Gradient Boosting은 교차검증 MAPE 10.45%, Hold-out MAPE 8.48%를 기록했다. 교차검증 최저 점수는 아니었지만 새로운 충전 정책으로 분리한 Hold-out에서 가장 안정적인 결과를 보여 최종 모델로 선택했다.
+  - `max_depth=1`로 제한한 얕은 Tree를 사용해 작은 데이터에서도 복잡한 규칙을 과도하게 학습하지 않도록 했다. 여러 개의 얕은 Tree가 선형 모델로 설명하기 어려운 관계를 순차적으로 보완하도록 구성했다.
+  - Batch 2와 Batch 3의 결과는 모델 선택 이후에만 확인했다. 외부 Test 성능을 보고 Feature, 모델 또는 하이퍼파라미터를 다시 선택하지 않아 평가 데이터의 독립성을 유지했다.
+  - 약 100개 Cell 규모의 작은 정형 데이터셋에서는 대규모 딥러닝의 복잡성을 뒷받침할 학습량이 부족하다고 판단했다. 따라서 이번 과제에서는 모델 규모보다 EDA와 Feature 설계, 검증 구조 및 외부 Batch에서 발생하는 오류 원인을 확인하는 데 초점을 맞췄다.
 
 Batch 1은 충전 정책 기반 `GroupShuffleSplit`으로 학습 영역과 Hold-out을 분리하고, 학습 영역에서는 `GroupKFold` 교차검증을 수행했다. 동일한 충전 정책이 학습과 검증에 동시에 포함되는 것을 방지했다.
+
+다만 한 번의 Hold-out 결과만으로 Gradient Boosting이 항상 우수하다고 결론 내릴 수는 없다. 이번 선택은 Batch 1 안에서 정한 검증 기준에 따른 결과이며, Batch 2에서 MAPE가 크게 증가한 사실은 현재 Feature와 모델이 다른 수명 분포까지 충분히 일반화하지 못한다는 한계를 보여준다.
 
 ## 성능 결과
 
