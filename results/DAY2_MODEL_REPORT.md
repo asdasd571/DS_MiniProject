@@ -2,7 +2,9 @@
 
 ## 모델 선택
 
-Batch 1만 사용해 후보 모델과 하이퍼파라미터를 비교했으며, Hold-out MAPE가 가장 낮은 **GradientBoosting**을 선택했다. Batch 2와 Batch 3 결과는 선택이나 재튜닝에 사용하지 않았다.
+후보 모델은 EDA에서 확인한 데이터 특성에 따라 정했다. Linear Regression은 선형 기준, ElasticNet은 ΔQ 파생 Feature의 다중공선성 대응, Gradient Boosting은 비선형 관계 비교에 사용했다.
+
+Batch 1만 사용해 후보 모델과 하이퍼파라미터를 비교했다. CV MAPE로 평균적인 안정성을 확인하고, 충전 정책이 겹치지 않는 Hold-out MAPE로 새로운 운전조건에 대한 성능을 확인했다. ElasticNet은 CV 성능이 가장 낮았지만 Hold-out에서 악화됐고, **GradientBoosting**이 Hold-out에서 가장 안정적인 결과를 보여 최종 선택했다. Batch 2와 Batch 3 결과는 선택이나 재튜닝에 사용하지 않았다.
 
 ## 성능 보고
 

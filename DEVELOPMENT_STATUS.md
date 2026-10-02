@@ -784,3 +784,36 @@
 ### Candidate Commit Message
 
 `📝[DOCS] Knee 시점과 충전 Protocol 평균 보강`
+
+## Step 24. README 기준 코드와 실행 노트북 동기화
+
+상태: [x] 완료
+
+### 수행 내용
+
+- 노트북 생성 스크립트를 README의 최신 EDA·모델 선택·평가 논리에 맞게 수정했다.
+- EDA 노트북에 Batch 비교형 그래프, Knee 중앙값, 대표 Protocol 평균과 인과해석 주의사항을 추가했다.
+- Feature Engineering 노트북에 실제 `MODEL_FEATURES`, 제외 Feature, 세 Batch 공통 추출 원칙을 추가했다.
+- Modeling 노트북에 후보 모델별 역할, CV와 Hold-out의 구분, 충전 정책 분리 검증 및 외부 Test 독립성을 추가했다.
+- 자동 생성 DAY2 보고서의 모델 선택 설명도 README와 같은 검증 과정 중심 문구로 변경했다.
+- 세 노트북을 다시 생성하고 실제 실행 결과를 저장했다.
+- Batch 1·2·3 전체 파이프라인을 다시 실행해 결과 파일을 갱신했다.
+
+### 테스트 결과
+
+- 세 Notebook 실행 완료
+- 전체 학습·평가 파이프라인 실행 완료
+- 결과 검증 스크립트 통과
+- Python 문법 검사 통과
+- 세 Notebook 실행 오류 0건 확인
+- `git diff --check` 통과
+
+### Git 상태
+
+- Branch: `main`
+- Commit: 수행하지 않음
+- Push: 수행하지 않음
+
+### Candidate Commit Message
+
+`♻️[REF] README 기준 EDA와 모델링 코드 동기화`
